@@ -4,3 +4,6 @@
 [submodule "pulseaudio/gui-agent"]
 	path = pulseaudio/gui-agent
 	url = https://github.com/QubesOS/qubes-gui-agent-linux
+[submodule "usbproxy"]
+	path = usbproxy
+	url = https://github.com/QubesOS/qubes-app-linux-usb-proxy/
