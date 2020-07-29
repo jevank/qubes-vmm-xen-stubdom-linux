@@ -32,6 +32,7 @@ for i in \
     grep \
     head \
     ip \
+    logger \
     ls \
     mdev \
     mkdir \
@@ -44,7 +45,9 @@ for i in \
     sh \
     sleep \
     sort \
+    su \
     tee \
+    timeout \
     touch \
     tr \
     udhcpd \
@@ -56,9 +59,9 @@ do
 done
 
 if [ -n "$LD_LIBRARY_PATH" ]; then
-    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
 else
-    export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio"
+    export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
 fi
 inst build/padist/usr/local/bin/pulseaudio /bin/pulseaudio
 for mod in build/padist/lib/module-*.so; do
@@ -75,6 +78,10 @@ inst xenstore-read /bin/xenstore-read
 
 inst helpers/vchan-socket-proxy /bin/vchan-socket-proxy
 inst helpers/add-fd /bin/add-fd
+
+inst qrexec/agent/qrexec-agent /bin/qrexec-agent
+inst qrexec/agent/qrexec-client-vm /bin/qrexec-client-vm
+echo "root:x:0:0:root:/root:/bin/sh" > $rootfs_dir/etc/passwd
 
 for i in write watch rm ls list; do
     ln -s xenstore-read "$rootfs_dir/bin/xenstore-$i"
@@ -107,6 +114,14 @@ rm -rf "$rootfs_dir/home"
 touch $rootfs_dir/etc/ld.so.conf
 /sbin/ldconfig -r $rootfs_dir /lib
 ln -s lib $rootfs_dir/lib64
+
+ln -s tmp $rootfs_dir/var
+mkdir -p $rootfs_dir/etc/qubes-rpc
+mkdir -p $rootfs_dir/usr/lib/qubes
+inst usbproxy/src/usb-import /usr/lib/qubes/usb-import
+inst qrexec/lib/qubes-rpc-multiplexer /usr/lib/qubes/qubes-rpc-multiplexer
+inst usbproxy/qubes-rpc/qubes.USBAttach /etc/qubes-rpc/qubes.USBAttach
+inst usbproxy/qubes-rpc/qubes.USBDetach /etc/qubes-rpc/qubes.USBDetach
 
 find "$rootfs_dir" -print0 | xargs -0 touch -ch -d @0
 (

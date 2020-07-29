@@ -18,6 +18,11 @@ vm_path=$(xenstore-read "/local/domain/$domid/vm")
 # NUL well
 dm_args=$(xenstore-read $(xenstore-list -p "$vm_path/image/dmargs"|sort))
 
+
+mkdir -p /var/run/qubes
+export USER=root
+qrexec-agent &
+
 # add audiodev conf to cmdline and run pulseaudio 
 audio_model=$(echo "$dm_args" | sed -n '/^-soundhw/ {n;p}')
 if [ -n "$audio_model" ] ; then
