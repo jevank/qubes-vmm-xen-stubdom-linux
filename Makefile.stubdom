@@ -165,7 +165,7 @@ build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio
 		--disable-gtk \
 		--disable-fdt \
 		--disable-bluez \
-		--disable-libusb \
+		--enable-libusb \
 		--disable-slirp \
 		--enable-pie \
 		--disable-docs \
