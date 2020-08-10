@@ -1,0 +1,5 @@
+#!/bin/sh
+
+read domain busid
+(echo "$domain $busid" | sh /usr/lib/qubes/USBAttach) || exit 1
+echo '{ "execute": "device_add", "arguments": { "driver": "usb-host", "id": "test" } }' > /tmp/qmp/qemu.in
