@@ -81,6 +81,7 @@ inst helpers/add-fd /bin/add-fd
 
 inst qrexec/agent/qrexec-agent /bin/qrexec-agent
 inst qrexec/agent/qrexec-client-vm /bin/qrexec-client-vm
+inst qrexec/agent/qrexec-fork-server /bin/qrexec-fork-server
 echo "root:x:0:0:root:/root:/bin/sh" > $rootfs_dir/etc/passwd
 
 for i in write watch rm ls list; do
@@ -120,8 +121,13 @@ mkdir -p $rootfs_dir/etc/qubes-rpc
 mkdir -p $rootfs_dir/usr/lib/qubes
 inst usbproxy/src/usb-import /usr/lib/qubes/usb-import
 inst qrexec/lib/qubes-rpc-multiplexer /usr/lib/qubes/qubes-rpc-multiplexer
-inst usbproxy/qubes-rpc/qubes.USBAttach /etc/qubes-rpc/qubes.USBAttach
-inst usbproxy/qubes-rpc/qubes.USBDetach /etc/qubes-rpc/qubes.USBDetach
+inst usbproxy/qubes-rpc/qubes.USBAttach /usr/lib/qubes/USBAttach
+inst usbproxy/qubes-rpc/qubes.USBDetach /usr/lib/qubes/USBDetach
+
+inst helpers/qmp.USBAttach /etc/qubes-rpc/qubes.USBAttach
+
+#chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBDetach
+chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBAttach
 
 find "$rootfs_dir" -print0 | xargs -0 touch -ch -d @0
 (
