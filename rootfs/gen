@@ -125,8 +125,9 @@ inst usbproxy/qubes-rpc/qubes.USBAttach /usr/lib/qubes/USBAttach
 inst usbproxy/qubes-rpc/qubes.USBDetach /usr/lib/qubes/USBDetach
 
 inst helpers/qmp.USBAttach /etc/qubes-rpc/qubes.USBAttach
+inst helpers/qmp.USBDetach /etc/qubes-rpc/qubes.USBDetach
 
-#chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBDetach
+chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBDetach
 chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBAttach
 
 find "$rootfs_dir" -print0 | xargs -0 touch -ch -d @0
