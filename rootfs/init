@@ -18,12 +18,6 @@ vm_path=$(xenstore-read "/local/domain/$domid/vm")
 # NUL well
 dm_args=$(xenstore-read $(xenstore-list -p "$vm_path/image/dm-argv"|sort))
 
-
-mkdir -p /var/run/qubes
-export USER=root
-qrexec-agent &
-
-
 mkdir -p /var/run/qubes
 export USER=root
 qrexec-agent &
