@@ -129,6 +129,23 @@ build/pulseaudio/config.status: build/pulseaudio/.patched  build/pulseaudio/src/
 build/padist/usr/bin/pulseaudio: build/pulseaudio/config.status
 	$(MAKE) install-strip -C build/pulseaudio DESTDIR=$(shell pwd)/build/padist
 
+build/libusb/.extracted: libusb-$(LIBUSB_VERSION).tar.bz2
+	rm -rf build/libusb
+	mkdir -p build/libusb
+	tar -C build/libusb --strip-components=1 -xf $<
+	touch $@
+
+build/libusb/config.status: build/libusb/.extracted
+	cd build/libusb && ./configure \
+			--disable-static \
+			--disable-udev \
+			--libdir=/lib
+
+build/libusb/.installed: build/libusb/config.status
+	$(MAKE) -C build/libusb
+	$(MAKE)	install-strip -C build/libusb DESTDIR=$(shell pwd)/build/padist
+	touch $@
+
 QEMU_PATCHES := $(shell $Q -l qemu)
 
 build/qemu/.extracted: qemu-$(QEMU_VERSION).tar.xz
@@ -154,7 +171,7 @@ build/qemu/.gui-agent-copied-in: build/qemu/.extracted $(QEMU_GUI_AGENT_FILES)
 
 export QEMU_PKG_CONFIG_FLAGS=--with-path=$(shell pwd)/build/padist/lib/pkgconfig
 
-build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio
+build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio build/libusb/.installed
 	cd build/qemu && ./configure \
 		--target-list=i386-softmmu \
 		--enable-xen \
@@ -238,7 +255,7 @@ build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio
 		--disable-auth-pam \
 		--enable-rng-none \
 		--cxx=/non-existent \
-		--extra-cflags="-DXEN_PT_LOGGING_ENABLED=1 -I$(shell pwd)/build/padist/usr/local/include" \
+		--extra-cflags="-DXEN_PT_LOGGING_ENABLED=1 -I$(shell pwd)/build/padist/usr/local/include -I$(shell pwd)/build/padist/usr/local/include/libusb-1.0" \
 		--extra-ldflags="-Wl,-z,nodlopen -Wl,-z,nodump -Wl,-z,noexecstack -Wl,-rpath-link,$(shell pwd)/build/padist/lib/pulseaudio -L$(shell pwd)/build/padist/lib" \
 		--prefix= 
 
