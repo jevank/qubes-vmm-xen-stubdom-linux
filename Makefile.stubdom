@@ -1,10 +1,10 @@
 include Makefile.vars
 
-.PHONY: all install clean
+.PHONY: all full install clean
 
 SHELL := bash
 
-STUBDOM_BINDIR=/usr/lib/xen/boot
+STUBDOM_BINDIR=/usr/libexec/xen/boot
 VMLINUZ=build/linux/arch/x86/boot/bzImage
 ROOTFS_IMG=build/rootfs/stubdom-linux-rootfs
 
@@ -21,6 +21,30 @@ STUBDOM_DISK_FILE= \
 Q=scripts/quilt-wrapper
 
 all: $(VMLINUZ) $(ROOTFS_IMG)
+full: all
+
+ifeq ($(filter full,$(MAKECMDGOALS)),)
+    QEMU_OPTIONS=--enable-libusb --audio-drv-list=pa
+    QEMU_EXTRA_CFLAGS+=-I$(shell pwd)/build/padist/usr/local/include \
+	     -I$(shell pwd)/build/padist/usr/local/include/libusb-1.0
+    QEMU_EXTRA_LDFLAGS+=-Wl,-z,nodlopen -Wl,-z,nodump -Wl,-z,noexecstack \
+		 -Wl,-rpath-link,$(shell pwd)/build/padist/lib/pulseaudio \
+		 -L$(shell pwd)/build/padist/lib
+    ROOTFS_NAME=qemu-stubdom-linux-full-rootfs
+    KERNEL_NAME=qemu-stubdom-linux-full-kernel
+    KERNEL_CONFIG=[0-9][0-9]-*
+    FULL_BUILDDEPS=build/padist/usr/bin/pulseaudio \
+		build/libusb/.installed \
+		build/qrexec/agent/qrexec-agent
+else
+    QEMU_OPTIONS=--disable-libusb --audio-drv-list=
+    QEMU_EXTRA_CFLAGS=
+    QEMU_EXTRA_LDFLAGS=
+    FULL_BUILDDEPS=
+    ROOTFS_NAME=qemu-stubdom-linux-rootfs
+    KERNEL_NAME=qemu-stubdom-linux-kernel
+    KERNEL_CONFIG=[0-4][0-9]-*
+endif
 
 BUSYBOX_PATCHES := $(shell $Q -l busybox)
 
@@ -146,6 +170,13 @@ build/libusb/.installed: build/libusb/config.status
 	$(MAKE)	install-strip -C build/libusb DESTDIR=$(shell pwd)/build/padist
 	touch $@
 
+build/qrexec/agent/qrexec-agent:
+	rm -rf build/qrexec
+	mkdir -p build
+	cp -a qrexec build/
+	make BACKEND_VMM=xen -C build/qrexec/libqrexec all
+	make BACKEND_VMM=xen -C build/qrexec/agent qrexec-client-vm qrexec-agent qrexec-fork-server
+
 QEMU_PATCHES := $(shell $Q -l qemu)
 
 build/qemu/.extracted: qemu-$(QEMU_VERSION).tar.xz
@@ -171,7 +202,7 @@ build/qemu/.gui-agent-copied-in: build/qemu/.extracted $(QEMU_GUI_AGENT_FILES)
 
 export QEMU_PKG_CONFIG_FLAGS=--with-path=$(shell pwd)/build/padist/lib/pkgconfig
 
-build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio build/libusb/.installed
+build/qemu/config.status: build/qemu/.patched $(FULL_BUILDDEPS) 
 	cd build/qemu && ./configure \
 		--target-list=i386-softmmu \
 		--enable-xen \
@@ -182,14 +213,12 @@ build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio bu
 		--disable-gtk \
 		--disable-fdt \
 		--disable-bluez \
-		--enable-libusb \
 		--disable-slirp \
 		--enable-pie \
 		--disable-docs \
 		--disable-vhost-net \
 		--disable-spice \
 		--disable-guest-agent \
-		--audio-drv-list=pa \
 		--disable-smartcard \
 		--disable-vnc \
 		--disable-spice \
@@ -254,9 +283,10 @@ build/qemu/config.status: build/qemu/.patched build/padist/usr/bin/pulseaudio bu
 		--disable-sheepdog \
 		--disable-auth-pam \
 		--enable-rng-none \
+		${QEMU_OPTIONS} \
 		--cxx=/non-existent \
-		--extra-cflags="-DXEN_PT_LOGGING_ENABLED=1 -I$(shell pwd)/build/padist/usr/local/include -I$(shell pwd)/build/padist/usr/local/include/libusb-1.0" \
-		--extra-ldflags="-Wl,-z,nodlopen -Wl,-z,nodump -Wl,-z,noexecstack -Wl,-rpath-link,$(shell pwd)/build/padist/lib/pulseaudio -L$(shell pwd)/build/padist/lib" \
+		--extra-cflags="-DXEN_PT_LOGGING_ENABLED=1 ${QEMU_EXTRA_CFLAGS}" \
+		--extra-ldflags="${QEMU_EXTRA_LDFLAGS}" \
 		--prefix= 
 
 build/qemu/i386-softmmu/qemu-system-i386: build/qemu/.patched build/qemu/config.status build/qemu/.gui-agent-copied-in
@@ -280,7 +310,7 @@ build/linux/.patched: build/linux/.extracted linux/patches/series $(LINUX_PATCHE
 	touch $@
 
 build/linux/.config: $(sort $(wildcard linux/config/[0-9][0-9]-*)) build/linux/.extracted
-	cd build/linux; env -u MAKEFLAGS ./scripts/kconfig/merge_config.sh -n /dev/null ../../linux/config/[0-9][0-9]-*
+	cd build/linux; env -u MAKEFLAGS ./scripts/kconfig/merge_config.sh -n /dev/null ../../linux/config/$(KERNEL_CONFIG)
 
 $(VMLINUZ): build/linux/.patched build/linux/.config
 	$(MAKE) -C build/linux
@@ -297,8 +327,8 @@ $(ROOTFS_IMG): rootfs/gen $(STUBDOM_DISK_FILE)
 	env -u MAKELEVEL -u MAKEFLAGS -u MFLAGS ./$<
 
 install: $(VMLINUZ) $(ROOTFS_IMG)
-	install -D -m 444 $(VMLINUZ) $(DESTDIR)$(STUBDOM_BINDIR)/qemu-stubdom-linux-kernel
-	install -D -m 444 $(ROOTFS_IMG) $(DESTDIR)$(STUBDOM_BINDIR)/qemu-stubdom-linux-rootfs
+	install -D -m 444 $(VMLINUZ) $(DESTDIR)$(STUBDOM_BINDIR)/$(KERNEL_NAME)
+	install -D -m 444 $(ROOTFS_IMG) $(DESTDIR)$(STUBDOM_BINDIR)/$(ROOTFS_NAME)
 
 clean:
 	rm -rf build

@@ -58,15 +58,18 @@ do
     ln -s busybox "$rootfs_dir/bin/$i"
 done
 
-if [ -n "$LD_LIBRARY_PATH" ]; then
-    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
-else
-    export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
+
+if [[ -e "$PWD/build/padist/usr/local/bin/pulseaudio" ]]; then
+    if [ -n "$LD_LIBRARY_PATH" ]; then
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
+    else
+	export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
+    fi
+    inst build/padist/usr/local/bin/pulseaudio /bin/pulseaudio
+    for mod in build/padist/lib/module-*.so; do
+	inst "$mod" /lib/$(basename "$mod")
+    done
 fi
-inst build/padist/usr/local/bin/pulseaudio /bin/pulseaudio
-for mod in build/padist/lib/module-*.so; do
-    inst "$mod" /lib/$(basename "$mod")
-done
 
 make DESTDIR="$PWD/build/qemu/install" -C build/qemu install
 inst build/qemu/install/bin/qemu-system-i386 /bin/qemu
@@ -79,10 +82,12 @@ inst xenstore-read /bin/xenstore-read
 inst helpers/vchan-socket-proxy /bin/vchan-socket-proxy
 inst helpers/add-fd /bin/add-fd
 
-inst qrexec/agent/qrexec-agent /bin/qrexec-agent
-inst qrexec/agent/qrexec-client-vm /bin/qrexec-client-vm
-inst qrexec/agent/qrexec-fork-server /bin/qrexec-fork-server
+if [[ -e "$PWD/build/qrexec/agent/qrexec-agent" ]]; then
+inst build/qrexec/agent/qrexec-agent /bin/qrexec-agent
+inst build/qrexec/agent/qrexec-client-vm /bin/qrexec-client-vm
+inst build/qrexec/agent/qrexec-fork-server /bin/qrexec-fork-server
 echo "root:x:0:0:root:/root:/bin/sh" > $rootfs_dir/etc/passwd
+fi
 
 for i in write watch rm ls list; do
     ln -s xenstore-read "$rootfs_dir/bin/xenstore-$i"
@@ -116,6 +121,7 @@ touch $rootfs_dir/etc/ld.so.conf
 /sbin/ldconfig -r $rootfs_dir /lib
 ln -s lib $rootfs_dir/lib64
 
+if [[ -e "$PWD/build/libusb/.installed" ]]; then
 ln -s tmp $rootfs_dir/var
 mkdir -p $rootfs_dir/etc/qubes-rpc
 mkdir -p $rootfs_dir/usr/lib/qubes
@@ -129,6 +135,7 @@ inst helpers/qmp.USBDetach /etc/qubes-rpc/qubes.USBDetach
 
 chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBDetach
 chmod a+x $rootfs_dir/etc/qubes-rpc/qubes.USBAttach
+fi
 
 find "$rootfs_dir" -print0 | xargs -0 touch -ch -d @0
 (
