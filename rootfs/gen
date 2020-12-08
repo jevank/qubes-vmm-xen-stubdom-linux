@@ -59,11 +59,11 @@ do
 done
 
 
-if [[ -e "$PWD/build/padist/usr/local/bin/pulseaudio" ]]; then
+if [[ -e "$PWD/build/qrexec/agent/qrexec-agent" ]]; then
     if [ -n "$LD_LIBRARY_PATH" ]; then
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/build/qrexec/libqrexec"
     else
-	export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/qrexec/libqrexec"
+	export LD_LIBRARY_PATH="$PWD/build/padist/lib:$PWD/build/padist/lib/pulseaudio:$PWD/build/qrexec/libqrexec"
     fi
     inst build/padist/usr/local/bin/pulseaudio /bin/pulseaudio
     for mod in build/padist/lib/module-*.so; do

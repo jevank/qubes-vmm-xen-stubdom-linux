@@ -17,12 +17,10 @@ vm_path=$(xenstore-read "/local/domain/$domid/vm")
 # convert multiple keys into \n separated arguments, as shell doesn't handle
 # NUL well
 dm_args=$(xenstore-read $(xenstore-list -p "$vm_path/image/dm-argv"|sort))
-
-
-if test -e /bin/qrexec-agent; then
+ 
+if test -e /bin/qrexec-agent; then 
     mkdir -p /var/run/qubes
-    export USER=root
-    qrexec-agent &
+    USER=root qrexec-agent &
 fi
 
 # add audiodev conf to cmdline and run pulseaudio 
