@@ -17,8 +17,10 @@ vm_path=$(xenstore-read "/local/domain/$domid/vm")
 # convert multiple keys into \n separated arguments, as shell doesn't handle
 # NUL well
 dm_args=$(xenstore-read $(xenstore-list -p "$vm_path/image/dm-argv"|sort))
- 
+
+usb_args=
 if test -e /bin/qrexec-agent; then 
+    usb_args='-device qemu-xhci,id=xhci'
     mkdir -p /var/run/qubes
     USER=root qrexec-agent &
 fi
@@ -156,7 +158,7 @@ set -f
 qemu -sandbox on,obsolete=deny,elevateprivileges=deny,spawn=deny,resourcecontrol=deny \
 -chardev pipe,path=/tmp/qmp/qemu,id=m -mon chardev=m,mode=control \
 -chardev socket,server,nowait,path=/tmp/qemu.qmp,id=m2 -mon chardev=m2,mode=control \
-    $dm_args $pa_args $kernel &
+    $dm_args $pa_args $usb_args $kernel &
 set +f
 unset IFS
 
