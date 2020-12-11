@@ -20,7 +20,7 @@ dm_args=$(xenstore-read $(xenstore-list -p "$vm_path/image/dm-argv"|sort))
 
 usb_args=
 if test -e /bin/qrexec-agent; then 
-    usb_args='-device\nqemu-xhci,id=xhci'
+    usb_args=$'-device\nqemu-xhci,id=xhci'
     mkdir -p /var/run/qubes
     USER=root qrexec-agent &
 fi
