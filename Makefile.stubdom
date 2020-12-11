@@ -23,7 +23,7 @@ Q=scripts/quilt-wrapper
 all: $(VMLINUZ) $(ROOTFS_IMG)
 full: all
 
-ifeq ($(filter full,$(MAKECMDGOALS)),)
+ifneq ($(filter full,$(MAKECMDGOALS)),)
     QEMU_OPTIONS=--enable-libusb --audio-drv-list=pa
     QEMU_EXTRA_CFLAGS+=-I$(shell pwd)/build/padist/usr/local/include \
 	     -I$(shell pwd)/build/padist/usr/local/include/libusb-1.0
