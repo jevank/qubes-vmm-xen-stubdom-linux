@@ -2,4 +2,4 @@
 
 read domain busid
 (echo "$domain $busid" | sh /usr/lib/qubes/USBAttach) || exit 1
-echo '{ "execute": "device_add", "arguments": { "driver": "usb-host", "id": "busid-'"$busid"'", "bus": "xhci.0" } }' > /tmp/qmp/qemu.in
+echo '{ "execute": "device_add", "arguments": { "driver": "usb-host", "id": "busid-'"$busid"'", "bus": "xhci.0", "guest-reset": "False" } }' > /tmp/qmp/qemu.in
