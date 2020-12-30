@@ -1,5 +1,0 @@
-#!/bin/sh
-
-read domain busid
-(echo "$domain $busid" | sh /usr/lib/qubes/USBDetach) || exit 1
-echo '{ "execute": "device_del", "arguments": { "id": "busid-'"$busid"'" } }' > /tmp/qmp/qemu.in
