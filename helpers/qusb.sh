@@ -1,10 +1,14 @@
 #!/bin/sh
 
-echo "$ACTION $MDEV" >> /tmp/qusb.log
+echo -n "$ACTION $MDEV " >> /tmp/qusb.log
 
 if [ "$ACTION" == "bind" ]; then
-       echo '{ "execute": "device_add", "arguments": { "driver": "usb-host", "id": "busid-'"`busybox basename $MDEV`"'", "bus": "xhci.0", "guest-reset": "False" } }' > /tmp/qmp/qemu.in
+	SPEED=`sed -n '1p;' /sys/$DEVPATH/speed`
+	if [ $SPEED -gt 480 ]; then BUS="xhci.0"; else BUS="ehci.0"; fi;
+	echo "$SPEED $BUS $DEVPATH" >> /tmp/qusb.log
+        echo '{ "execute": "device_add", "arguments": { "driver": "usb-host", "id": "busid-'"`busybox basename $MDEV`"'", "bus": "'"$BUS"'", "guest-reset": "False" } }' > /tmp/qmp/qemu.in
 elif [ "$ACTION" == "unbind" ]; then
+	echo "done" >> /tmp/qusb.log
 	echo '{ "execute": "device_del", "arguments": { "id": "busid-'"`busybox basename $MDEV`"'" } }' > /tmp/qmp/qemu.in
 else
 	echo "skip action" >> /tmp/qusb.log

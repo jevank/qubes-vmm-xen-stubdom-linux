@@ -88,7 +88,7 @@ inst build/qrexec/agent/qrexec-agent /bin/qrexec-agent
 inst build/qrexec/agent/qrexec-client-vm /bin/qrexec-client-vm
 inst build/qrexec/agent/qrexec-fork-server /bin/qrexec-fork-server
 echo "root:x:0:0:root:/root:/bin/sh" > $rootfs_dir/etc/passwd
-echo "bus/usb/001/00[2-9] 0:0 660 *sh /bin/qusb.sh" > $rootfs_dir/etc/mdev.conf 
+echo "bus/usb/00[1-9]/00[2-9] 0:0 660 *sh /bin/qusb.sh" > $rootfs_dir/etc/mdev.conf 
 fi
 
 for i in write watch rm ls list; do
