@@ -23,6 +23,7 @@ if test -e /bin/qrexec-agent; then
     usb_args=$'-device\nqemu-xhci,id=xhci'
     mkdir -p /var/run/qubes
     USER=root qrexec-agent &
+    touch /dev/mdev.log
     mdev -d
 fi
 
