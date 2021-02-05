@@ -1,18 +1,28 @@
+diff --git a/hw/i386/pc_piix.c b/hw/i386/pc_piix.c
+index b789e83f..bba56c72 100644
 --- a/hw/i386/pc_piix.c
 +++ b/hw/i386/pc_piix.c
-@@ -181,6 +181,15 @@ static void pc_init1(MachineState *machi
-     } else if (machine->kernel_filename != NULL) {
-         /* For xen HVM direct kernel boot, load linux here */
-         xen_load_linux(pcms);
-+    } else {
-+        pcmc->has_acpi_build = false;
+@@ -30,6 +30,7 @@
+ #include "hw/i386/x86.h"
+ #include "hw/i386/pc.h"
+ #include "hw/i386/apic.h"
++#include "hw/i386/fw_cfg.h"
+ #include "hw/pci-host/i440fx.h"
+ #include "hw/southbridge/piix.h"
+ #include "hw/display/ramfb.h"
+@@ -191,6 +192,15 @@ static void pc_init1(MachineState *machine,
+         if (machine->kernel_filename != NULL) {
+             /* For xen HVM direct kernel boot, load linux here */
+             xen_load_linux(pcms);
++        } else {
++            pcmc->has_acpi_build = false;
 +
-+        FWCfgState *fw_cfg;
++            FWCfgState *fw_cfg;
 +
-+        fw_cfg = fw_cfg_init_io(FW_CFG_IO_BASE);
-+        rom_set_fw(fw_cfg);
++            fw_cfg = fw_cfg_init_io(FW_CFG_IO_BASE);
++            rom_set_fw(fw_cfg);
 +
-+        x86ms->fw_cfg = fw_cfg;
++            x86ms->fw_cfg = fw_cfg;
+         }
      }
  
-     gsi_state = g_malloc0(sizeof(*gsi_state));

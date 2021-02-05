@@ -1,6 +1,8 @@
+diff --git a/hw/xen/xen_pt_config_init.c b/hw/xen/xen_pt_config_init.c
+index c8724cc7c..8ee42bc22 100644
 --- a/hw/xen/xen_pt_config_init.c
 +++ b/hw/xen/xen_pt_config_init.c
-@@ -1955,7 +1955,7 @@ static void xen_pt_config_reg_init(XenPC
+@@ -1969,7 +1969,7 @@ static void xen_pt_config_reg_init(XenPCIPassthroughState *s,
              /* Mask out host (including past size). */
              new_val = val & host_mask;
              /* Merge emulated ones (excluding the non-emulated ones). */

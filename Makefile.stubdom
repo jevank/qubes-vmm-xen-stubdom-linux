@@ -212,7 +212,6 @@ build/qemu/config.status: build/qemu/.patched $(FULL_BUILDDEPS)
 		--disable-kvm \
 		--disable-gtk \
 		--disable-fdt \
-		--disable-bluez \
 		--disable-slirp \
 		--enable-pie \
 		--disable-docs \
@@ -269,7 +268,6 @@ build/qemu/config.status: build/qemu/.patched $(FULL_BUILDDEPS)
 		--disable-tcg \
 		--disable-crypto-afalg \
 		--disable-live-block-migration \
-		--disable-vxhs \
 		--disable-vhost-user \
 		--disable-vhost-crypto \
 		--disable-vdi \

@@ -1,6 +1,8 @@
---- a/hw/audio/intel-hda.c	2019-12-12 21:20:47.000000000 +0300
-+++ b/hw/audio/intel-hda.c	2020-05-30 23:37:49.243703883 +0300
-@@ -1318,6 +1318,19 @@ static int intel_hda_and_codec_init(PCIB
+diff --git a/hw/audio/intel-hda.c b/hw/audio/intel-hda.c
+index 4330213ff..8006c5854 100644
+--- a/hw/audio/intel-hda.c
++++ b/hw/audio/intel-hda.c
+@@ -1318,6 +1318,19 @@ static int intel_hda_and_codec_init(PCIBus *bus)
      return 0;
  }
  
@@ -12,15 +14,15 @@
 +
 +    controller = DEVICE(pci_create_simple(bus, -1, "ich9-intel-hda"));
 +    hdabus = QLIST_FIRST(&controller->child_bus);
-+    codec = qdev_create(hdabus, "hda-duplex");
-+    qdev_init_nofail(codec);
++    codec = qdev_new("hda-duplex");
++    qdev_realize_and_unref(codec, hdabus, &error_fatal);
 +    return 0;
 +}
 +
  static void intel_hda_register_types(void)
  {
      type_register_static(&hda_codec_bus_info);
-@@ -1326,6 +1339,8 @@ static void intel_hda_register_types(voi
+@@ -1326,6 +1339,8 @@ static void intel_hda_register_types(void)
      type_register_static(&intel_hda_info_ich9);
      type_register_static(&hda_codec_device_type_info);
      pci_register_soundhw("hda", "Intel HD Audio", intel_hda_and_codec_init);
@@ -29,9 +31,11 @@
  }
  
  type_init(intel_hda_register_types)
---- a/hw/audio/soundhw.c	2019-12-12 21:20:47.000000000 +0300
-+++ b/hw/audio/soundhw.c	2020-05-30 23:35:24.126052726 +0300
-@@ -40,7 +40,7 @@ struct soundhw {
+diff --git a/hw/audio/soundhw.c b/hw/audio/soundhw.c
+index 173b674ff..4327bea1c 100644
+--- a/hw/audio/soundhw.c
++++ b/hw/audio/soundhw.c
+@@ -42,7 +42,7 @@ struct soundhw {
      } init;
  };
  

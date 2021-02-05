@@ -11,10 +11,10 @@ Signed-off-by: Grzegorz Uriasz <gorbak25@gmail.com>
  1 file changed, 13 deletions(-)
 
 diff --git a/hw/xen/xen_pt_graphics.c b/hw/xen/xen_pt_graphics.c
-index 7d46e9c209..303674365b 100644
+index a3bc7e392..f0d65c189 100644
 --- a/hw/xen/xen_pt_graphics.c
 +++ b/hw/xen/xen_pt_graphics.c
-@@ -283,19 +283,6 @@ void igd_write_opregion(XenPCIPassthroughState *s, uint32_t val)
+@@ -257,19 +257,6 @@ void igd_write_opregion(XenPCIPassthroughState *s, uint32_t val)
      igd_guest_opregion = (unsigned long)(val & ~XEN_PCI_INTEL_OPREGION_MASK)
                              | (igd_host_opregion & XEN_PCI_INTEL_OPREGION_MASK);
  
@@ -34,6 +34,3 @@ index 7d46e9c209..303674365b 100644
      ret = xc_domain_memory_mapping(xen_xc, xen_domid,
              (unsigned long)(igd_guest_opregion >> XC_PAGE_SHIFT),
              (unsigned long)(igd_host_opregion >> XC_PAGE_SHIFT),
--- 
-2.26.1
-

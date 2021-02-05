@@ -1,8 +1,10 @@
+diff --git a/hw/i386/xen/xen-hvm.c b/hw/i386/xen/xen-hvm.c
+index 9519c33c0..628fe1e32 100644
 --- a/hw/i386/xen/xen-hvm.c
 +++ b/hw/i386/xen/xen-hvm.c
-@@ -1405,6 +1405,10 @@ void xen_hvm_init(PCMachineState *pcms,
-     state->wakeup.notify = xen_wakeup_notifier;
-     qemu_register_wakeup_notifier(&state->wakeup);
+@@ -1434,6 +1434,10 @@ void xen_hvm_init_pc(PCMachineState *pcms, MemoryRegion **ram_memory)
+      */
+     qemu_register_wakeup_support();
  
 +    if (xen_stubdom_enable()) {
 +        xc_set_hvm_param(xen_xc, xen_domid, HVM_PARAM_DM_DOMAIN, DOMID_SELF);
@@ -11,9 +13,9 @@
      rc = xen_map_ioreq_server(state);
      if (rc < 0) {
          goto err;
-@@ -1479,12 +1479,20 @@ void xen_hvm_init(PCMachineState *pcms,
-     QLIST_INIT(&state->dev_list);
-     device_listener_register(&state->device_listener);
+@@ -1510,12 +1514,20 @@ void xen_hvm_init_pc(PCMachineState *pcms, MemoryRegion **ram_memory)
+ 
+     xen_bus_init();
  
 +#ifndef CONFIG_STUBDOM
      /* Initialize backend core & drivers */
